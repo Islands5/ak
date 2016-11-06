@@ -10,33 +10,61 @@ import (
 )
 
 func main() {
-	var keyPath string
-	flag.StringVar(&keyPath, "P", "empty", "input path of public key file")
-	flag.StringVar(&keyPath, "path", "empty", "input path of public key file")
+	var path, tagKey, tagValue string
+	flag.StringVar(&path, "P", "empty", "input path of public key file")
+	flag.StringVar(&path, "path", "empty", "input path of public key file")
+
+	flag.StringVar(&tagKey, "tk", "empty", "input path of public key file")
+	flag.StringVar(&tagKey, "tag-key", "empty", "input path of public key file")
+
+	flag.StringVar(&tagValue, "tv", "empty", "input path of public key file")
+	flag.StringVar(&tagValue, "tag-value", "empty", "input path of public key file")
 
 	flag.Parse()
 
-	fmt.Printf("path: %v\n", keyPath)
-	fmt.Printf("args: %v\n", flag.Args())
+	fmt.Printf("path: %v\n", path)
+	fmt.Printf("tag-key: %v\n", tagKey)
+	fmt.Printf("tag-value: %v\n", tagValue)
 
+	for _, ele := range getPublicIPAddresses(tagKey, tagValue) {
+		fmt.Printf("IPAddresses: %v\n", ele)
+	}
+
+}
+
+func getPublicIPAddresses(tagKey string, tagValue string) []string {
+	var ipAddresses []string
+	awsTag := "tag:" + tagKey
 	sess, err := session.NewSession()
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
 	}
 
 	svc := ec2.New(sess, &aws.Config{Region: aws.String("ap-northeast-1")})
 
-	resp, err := svc.DescribeInstances(nil)
-	if err != nil {
-		panic(err)
+	params := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String(awsTag),
+				Values: []*string{
+					aws.String(tagValue),
+				},
+			},
+		},
 	}
 
-	fmt.Println("> Number of reservation sets: ", len(resp.Reservations))
-	for idx, res := range resp.Reservations {
-		fmt.Println("  > Number of instances: ", len(res.Instances))
+	resp, err := svc.DescribeInstances(params)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	// reservation sets
+	for idx := range resp.Reservations {
+		// instances
 		for _, inst := range resp.Reservations[idx].Instances {
-			fmt.Println("    - Instance ID: ", *inst.InstanceId)
+			ipAddresses = append(ipAddresses, *inst.PublicIpAddress)
 		}
 	}
 
+	return ipAddresses
 }
