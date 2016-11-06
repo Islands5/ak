@@ -14,11 +14,11 @@ func main() {
 	flag.StringVar(&path, "P", "empty", "input path of public key file")
 	flag.StringVar(&path, "path", "empty", "input path of public key file")
 
-	flag.StringVar(&tagKey, "tk", "empty", "input path of public key file")
-	flag.StringVar(&tagKey, "tag-key", "empty", "input path of public key file")
+	flag.StringVar(&tagKey, "tk", "empty", "input tag key")
+	flag.StringVar(&tagKey, "tag-key", "empty", "input tag key")
 
-	flag.StringVar(&tagValue, "tv", "empty", "input path of public key file")
-	flag.StringVar(&tagValue, "tag-value", "empty", "input path of public key file")
+	flag.StringVar(&tagValue, "tv", "empty", "input tag value")
+	flag.StringVar(&tagValue, "tag-value", "empty", "input tag value")
 
 	flag.Parse()
 
